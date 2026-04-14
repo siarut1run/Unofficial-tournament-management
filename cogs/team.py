@@ -40,3 +40,7 @@ class Team(commands.Cog):
         await message.channel.send(
             f"{message.author.mention} ✅ {role.name}"
         )
+
+# 🔥 これが無かった
+async def setup(bot):
+    await bot.add_cog(Team(bot))
