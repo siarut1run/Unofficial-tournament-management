@@ -8,12 +8,22 @@ class AutoRole(commands.Cog):
         self.bot = bot
 
     # -------------------------
-    # 登録コマンド
+    # 登録
     # -------------------------
     @app_commands.command(name="setrole", description="文字でロール付与設定")
     @app_commands.checks.has_permissions(administrator=True)
-    async def setrole(self, interaction: discord.Interaction, keyword: str, role: discord.Role):
-
+    @app_commands.describe(
+        keyword="反応する文字",
+        role="付与するロール",
+        channel="反応させるチャンネル"
+    )
+    async def setrole(
+        self,
+        interaction: discord.Interaction,
+        keyword: str,
+        role: discord.Role,
+        channel: discord.TextChannel
+    ):
         config = load_config()
         guild_id = str(interaction.guild.id)
 
@@ -25,11 +35,15 @@ class AutoRole(commands.Cog):
 
         key = keyword.lower().strip()
 
-        config[guild_id]["auto_roles"][key] = role.id
+        config[guild_id]["auto_roles"][key] = {
+            "role_id": role.id,
+            "channel_id": channel.id
+        }
+
         save_config(config)
 
         await interaction.response.send_message(
-            f"✅ '{keyword}' → {role.name} を登録！",
+            f"✅ '{keyword}' → {role.name}（{channel.mention}限定）",
             ephemeral=True
         )
 
@@ -57,7 +71,13 @@ class AutoRole(commands.Cog):
         if keyword not in data["auto_roles"]:
             return
 
-        role = message.guild.get_role(data["auto_roles"][keyword])
+        setting = data["auto_roles"][keyword]
+
+        # 🔥 チャンネル制限
+        if message.channel.id != setting["channel_id"]:
+            return
+
+        role = message.guild.get_role(setting["role_id"])
 
         if role is None:
             return
