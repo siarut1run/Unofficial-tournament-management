@@ -22,15 +22,19 @@ async def on_ready():
     print(f"起動完了: {bot.user}")
 
 # -------------------------
-# Cog読み込み
+# メイン処理
 # -------------------------
 async def main():
     async with bot:
+
+        # 🔥 Cog読み込み（全部入り）
         await bot.load_extension("cogs.setup")
         await bot.load_extension("cogs.team")
         await bot.load_extension("cogs.rolemanage")
         await bot.load_extension("cogs.autorole")
+        await bot.load_extension("cogs.seurole")
 
+        # 起動
         await bot.start(os.getenv("TOKEN"))
 
 # -------------------------
